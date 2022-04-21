@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cstdio>
 #include <sl/Camera.hpp>
 #include "zedCamera.h"
 
@@ -67,12 +68,21 @@ namespace zv {
       std::cerr << "zedCamera::open: ** ERROR **: failed to open camera: " << toString(err) << std::endl;
       m_camera.close();
       return 1; // Quit if an error occurred
-    }
-
+    } 
+    std::cout << "zedCamera::open: open succeeded" << std::endl;
+    std::cout << "zedCamera::open: reading camera information" << std::endl;
+    m_cameraInformation = m_camera.getCameraInformation();
+    sl::Resolution r = m_cameraInformation.camera_configuration.resolution;
+    std::cout << "zedCamera::open: serial number " << m_cameraInformation.serial_number << std::endl;
+    std::cout << "zedCamera::open: resolution " << r.width << "x" << r.height << std::endl; 
     return 0;
   }
-
-
+  
+  // close 
+  void zedCamera::close() {
+    std::cout << "zedCamera::close: closing camera"  << std::endl; 
+    m_camera.close();
+  }
 
   // reset 
   // reset camera to default state
@@ -83,6 +93,13 @@ namespace zv {
   // getFrame
   // get the latest camera frame
   int zedCamera::getFrame() {
+    std::cout << "zedCamera::getImage: capturing image" << std::endl; 
+    sl::Mat image;
+    if (m_camera.grab() == ERROR_CODE::SUCCESS) {
+        m_camera.retrieveImage(image, VIEW::LEFT);
+        auto timestamp = m_camera.getTimestamp(sl::TIME_REFERENCE::IMAGE);
+        printf("zedCamera::getFrame: %d x %d  (ts: %llu\n", image.getWidth(), image.getHeight(), timestamp);
+    }
     return 0;
   }
 

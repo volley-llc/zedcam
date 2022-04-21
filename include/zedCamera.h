@@ -25,10 +25,10 @@ namespace zv
       bool saveParams(const std::string fileName);
       bool loadParams(const std::string fileName);  
 
-      // open
-      // open the camera for capturing at a specified
-      // resolution and FPS
+      // open/close
+      // open the camera for capturing at a specified resolution and FPS
       int open(ResolutionFPS);
+      void close();
 
       // reset 
       // reset camera to default state
@@ -45,7 +45,8 @@ namespace zv
       // set the current camera control settings  
   
     private:
-      sl::Camera m_camera; 
+      sl::Camera m_camera;
+      sl::CameraInformation m_cameraInformation; 
   };
 
 }

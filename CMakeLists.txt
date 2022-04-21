@@ -31,7 +31,7 @@ SET(SRC_FOLDER src)
 FILE(GLOB_RECURSE SRC_FILES "${SRC_FOLDER}/*.cpp")  
 ADD_EXECUTABLE(${execName} ${SRC_FILES})
 
-add_definitions(-std=c++0x -g -O3)
+add_definitions(-std=c++0x -g -O3 -Wno-deprecated-declarations)
 
 # Add the required libraries for linking:
 TARGET_LINK_LIBRARIES(${execName}
