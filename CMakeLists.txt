@@ -1,7 +1,7 @@
-SET(execName zedtest)
+SET(libName zedtest)
 
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-PROJECT(${execName})
+#PROJECT(${execName})
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
@@ -29,12 +29,13 @@ link_directories(${CUDA_LIBRARY_DIRS})
 
 SET(SRC_FOLDER src)
 FILE(GLOB_RECURSE SRC_FILES "${SRC_FOLDER}/*.cpp")  
-ADD_EXECUTABLE(${execName} ${SRC_FILES})
+#ADD_EXECUTABLE(${execName} ${SRC_FILES})
+ADD_LIBRARY(${libName} SHARED ${SRC_FILES})
 
 add_definitions(-std=c++0x -g -O3 -Wno-deprecated-declarations)
 
 # Add the required libraries for linking:
-TARGET_LINK_LIBRARIES(${execName}
+TARGET_LINK_LIBRARIES(${libName}
     ${ZED_LIBRARIES}
     ${SPECIAL_OS_LIBS}
     ${CUDA_LIBRARIES} 
