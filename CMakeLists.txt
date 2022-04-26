@@ -18,24 +18,28 @@ find_package(ZED 2 REQUIRED)
 find_package(CUDA ${VERSION_REQ_CUDA} REQUIRED)
 SET(SPECIAL_OS_LIBS "pthread")
 
-# Set include dirs
-include_directories(${CUDA_INCLUDE_DIRS})
-include_directories(${ZED_INCLUDE_DIRS})
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
-
-# Set link dirs
+# Set link dirs (must be done before target creation)
 link_directories(${ZED_LIBRARY_DIR})
 link_directories(${CUDA_LIBRARY_DIRS})
 
-SET(SRC_FOLDER src)
-FILE(GLOB_RECURSE SRC_FILES "${SRC_FOLDER}/*.cpp")  
-#ADD_EXECUTABLE(${execName} ${SRC_FILES})
+FILE(GLOB_RECURSE SRC_FILES "src/*.cpp")  
+
+# add target
 ADD_LIBRARY(${libName} SHARED ${SRC_FILES})
 
 add_definitions(-std=c++0x -g -O3 -Wno-deprecated-declarations)
 
+message(STATUS "cuda include: ${CUDA_INCLUDE_DIRS}")
+message(STATUS "zed include: ${ZED_INCLUDE_DIRS}")
+target_include_directories(${libName}
+	PUBLIC
+	${CUDA_INCLUDE_DIRS}
+	${ZED_INCLUDE_DIRS}
+	"${CMAKE_CURRENT_SOURCE_DIR}/include"
+)
+
 # Add the required libraries for linking:
-TARGET_LINK_LIBRARIES(${libName}
+target_link_libraries(${libName}
     ${ZED_LIBRARIES}
     ${SPECIAL_OS_LIBS}
     ${CUDA_LIBRARIES} 
