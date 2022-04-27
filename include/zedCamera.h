@@ -4,7 +4,8 @@
 namespace zv
 {
 
-  enum class ResolutionFPS {
+  enum class ResolutionFPS
+  {
     HD1080_15,
     HD1080_30,
     HD720_15,
@@ -12,41 +13,53 @@ namespace zv
     HD720_60,
   };
 
+  struct CameraInfo
+  {
+    std::string make;
+    std::string model;
+    std::string firmware;
+  };
 
   class zedCamera
   {
-    public:
-      // construct/destruct 
-      zedCamera();
-      virtual ~zedCamera();
+  public:
+    // construct/destruct
+    zedCamera();
+    virtual ~zedCamera();
 
-      // save/load camera parameters
-      // (yml format)
-      bool saveParams(const std::string fileName);
-      bool loadParams(const std::string fileName);  
+    // is camera connected?
+    bool isConnected();
 
-      // open/close
-      // open the camera for capturing at a specified resolution and FPS
-      int open(ResolutionFPS);
-      void close();
+    // get camera info
+    int getCameraInfo(CameraInfo &info);
 
-      // reset 
-      // reset camera to default state
-      int reset();
+    // save/load camera parameters
+    // (yml format)
+    bool saveParams(const std::string fileName);
+    bool loadParams(const std::string fileName);
 
-      // getFrame
-      // get the latest camera frame
-      int getFrame();  
+    // open/close
+    // open the camera for capturing at a specified resolution and FPS
+    int open(ResolutionFPS);
+    void close();
 
-      // getControls
-      // retrieve the current camera control settings 
+    // reset
+    // reset camera to default state
+    int reset();
 
-      // setControls
-      // set the current camera control settings  
-  
-    private:
-      sl::Camera m_camera;
-      sl::CameraInformation m_cameraInformation; 
+    // getFrame
+    // get the latest camera frame
+    int getFrame();
+
+    // getControls
+    // retrieve the current camera control settings
+
+    // setControls
+    // set the current camera control settings
+
+  private:
+    sl::Camera m_camera;
+    sl::CameraInformation m_cameraInformation;
   };
 
 }

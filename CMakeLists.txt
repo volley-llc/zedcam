@@ -1,5 +1,7 @@
 SET(libName zedcamvolley)
 
+option(WITH_TEST "Configure with test exe" OFF)
+
 CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
 #PROJECT(${execName})
 
@@ -22,10 +24,29 @@ SET(SPECIAL_OS_LIBS "pthread")
 link_directories(${ZED_LIBRARY_DIR})
 link_directories(${CUDA_LIBRARY_DIRS})
 
-FILE(GLOB_RECURSE SRC_FILES "src/*.cpp")  
+FILE(GLOB_RECURSE LIB_SRC_FILES "src/zed*.cpp")  
+FILE(GLOB_RECURSE EXE_SRC_FILES "src/*.cpp")  
 
 # add target
-ADD_LIBRARY(${libName} SHARED ${SRC_FILES})
+ADD_LIBRARY(${libName} SHARED ${LIB_SRC_FILES})
+
+if (WITH_TEST) 
+  message(STATUS "including test exe")
+  ADD_EXECUTABLE("zedtest" ${EXE_SRC_FILES})
+  target_include_directories("zedtest"
+	  PUBLIC
+	  ${CUDA_INCLUDE_DIRS}
+	  ${ZED_INCLUDE_DIRS}
+	  "${CMAKE_CURRENT_SOURCE_DIR}/include"
+  )
+  target_link_libraries("zedtest"
+    ${ZED_LIBRARIES}
+    ${SPECIAL_OS_LIBS}
+    ${CUDA_LIBRARIES} 
+    ${CUDA_npps_LIBRARY} 
+    ${CUDA_nppi_LIBRARY}
+  )
+endif()
 
 add_definitions(-std=c++0x -g -O3 -Wno-deprecated-declarations)
 

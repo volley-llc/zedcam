@@ -5,102 +5,154 @@
 
 using namespace sl;
 
-namespace zv {
+namespace zv
+{
 
-  // construct/destruct 
-  zedCamera::zedCamera() {
+  // construct/destruct
+  zedCamera::zedCamera()
+  {
   }
 
-  zedCamera::~zedCamera() {
+  zedCamera::~zedCamera()
+  {
+  }
+
+  bool zedCamera::isConnected()
+  {
+    return m_camera.isOpened();
+  }
+
+  // get camera info
+  int zedCamera::getCameraInfo(CameraInfo &info)
+  {
+    if (!m_camera.isOpened())
+    {
+      std::cerr << "zedCamera::getCameraInfo: ** ERROR **: camera not open" << std::endl;
+      return -1;
+    }
+    info.make = "stereolabs";
+    switch (m_cameraInformation.camera_model)
+    {
+    case sl::MODEL::ZED:
+      info.model = "Zed";
+      break;
+    case sl::MODEL::ZED_M:
+      info.model = "Zed_M";
+      break;
+    case sl::MODEL::ZED2:
+      info.model = "Zed2";
+      break;
+    case sl::MODEL::ZED2i:
+      info.model = "Zed2i";
+      break;
+    default:
+      std::cerr << "zedCamera::getCameraInfo: ** ERROR **: unknown camera model " << m_cameraInformation.camera_model << std::endl;
+      return -1;
+      break;
+    }
+    unsigned int fw = m_cameraInformation.camera_configuration.firmware_version;
+    info.firmware = std::to_string(fw);
+    return 0;
   }
 
   // save/load camera parameters
   // (yml format)
-  bool zedCamera::saveParams(const std::string fileName) {
-    return true;;
+  bool zedCamera::saveParams(const std::string fileName)
+  {
+    return true;
+    ;
   }
 
-  bool zedCamera::loadParams(const std::string fileName) {
-    return true;;
+  bool zedCamera::loadParams(const std::string fileName)
+  {
+    return true;
+    ;
   }
 
   // open
   // open the camera for capturing at a specified
   // resolution and FPS
-  int zedCamera::open(ResolutionFPS resFPS) {
-   
+  int zedCamera::open(ResolutionFPS resFPS)
+  {
+
     sl::RESOLUTION res;
     int fps;
- 
-    switch (resFPS) {
-      case ResolutionFPS::HD1080_15:
-        res = RESOLUTION::HD1080;
-        fps = 15;
-        break;
-      case ResolutionFPS::HD1080_30:
-        res = RESOLUTION::HD1080;
-        fps = 30;
-        break;
-      case ResolutionFPS::HD720_15:
-        res = RESOLUTION::HD720;
-        fps = 15;
-        break;
-      case ResolutionFPS::HD720_30:
-        res = RESOLUTION::HD720;
-        fps = 30;
-        break;
-      case ResolutionFPS::HD720_60:
-        res = RESOLUTION::HD720;
-        fps = 60;
-        break;
-    } 
 
-    std::cout << "zedCamera::open: opening with fps=" << fps << ", res=" << res << std::endl; 
-   
+    switch (resFPS)
+    {
+    case ResolutionFPS::HD1080_15:
+      res = RESOLUTION::HD1080;
+      fps = 15;
+      break;
+    case ResolutionFPS::HD1080_30:
+      res = RESOLUTION::HD1080;
+      fps = 30;
+      break;
+    case ResolutionFPS::HD720_15:
+      res = RESOLUTION::HD720;
+      fps = 15;
+      break;
+    case ResolutionFPS::HD720_30:
+      res = RESOLUTION::HD720;
+      fps = 30;
+      break;
+    case ResolutionFPS::HD720_60:
+      res = RESOLUTION::HD720;
+      fps = 60;
+      break;
+    }
+
+    std::cout << "zedCamera::open: opening with fps=" << fps << ", res=" << res << std::endl;
+
     // Set configuration parameters
     InitParameters init_params;
-    init_params.camera_resolution = res; 
-     init_params.camera_fps = fps; 
-    
+    init_params.camera_resolution = res;
+    init_params.camera_fps = fps;
+
     // open the camera
     ERROR_CODE err = m_camera.open(init_params);
-    if (err != ERROR_CODE::SUCCESS) {
+    if (err != ERROR_CODE::SUCCESS)
+    {
       std::cerr << "zedCamera::open: ** ERROR **: failed to open camera: " << toString(err) << std::endl;
       m_camera.close();
-      return 1; // Quit if an error occurred
-    } 
+      return -1;
+    }
     std::cout << "zedCamera::open: open succeeded" << std::endl;
     std::cout << "zedCamera::open: reading camera information" << std::endl;
     m_cameraInformation = m_camera.getCameraInformation();
     sl::Resolution r = m_cameraInformation.camera_configuration.resolution;
     std::cout << "zedCamera::open: serial number " << m_cameraInformation.serial_number << std::endl;
-    std::cout << "zedCamera::open: resolution " << r.width << "x" << r.height << std::endl; 
+    std::cout << "zedCamera::open: resolution " << r.width << "x" << r.height << std::endl;
     return 0;
   }
-  
-  // close 
-  void zedCamera::close() {
-    std::cout << "zedCamera::close: closing camera"  << std::endl; 
+
+  // close
+  void zedCamera::close()
+  {
+    std::cout << "zedCamera::close: closing camera" << std::endl;
     m_camera.close();
   }
 
-  // reset 
+  // reset
   // reset camera to default state
-  int zedCamera::reset() {
+  int zedCamera::reset()
+  {
     return 0;
   }
 
   // getFrame
   // get the latest camera frame
-  int zedCamera::getFrame() {
-    std::cout << "zedCamera::getImage: capturing image" << std::endl; 
+  int zedCamera::getFrame()
+  {
+    std::cout << "zedCamera::getImage: capturing image" << std::endl;
     sl::Mat image;
-    if (m_camera.grab() == ERROR_CODE::SUCCESS) {
-        m_camera.retrieveImage(image, VIEW::LEFT);
-        auto timestamp = m_camera.getTimestamp(sl::TIME_REFERENCE::IMAGE);
-        printf("zedCamera::getFrame: %d x %d  (ts: %llu\n", image.getWidth(), image.getHeight(), timestamp);
+    if (m_camera.grab() == ERROR_CODE::SUCCESS)
+    {
+      m_camera.retrieveImage(image, VIEW::LEFT);
+      auto timestamp = m_camera.getTimestamp(sl::TIME_REFERENCE::IMAGE);
+      printf("zedCamera::getFrame: %d x %d  (ts: %llu\n", image.getWidth(), image.getHeight(), timestamp);
     }
     return 0;
   }
 
-} 
+}
