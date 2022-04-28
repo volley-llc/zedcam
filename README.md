@@ -1,2 +1,2 @@
 # zedcam
-C++ interface to the Zed2i camera
+Simple C++ interface to the Zed2i camera
