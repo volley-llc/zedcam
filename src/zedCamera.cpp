@@ -8,15 +8,7 @@ using namespace sl;
 namespace zv
 {
 
-// construct/destruct
-zedCamera::zedCamera()
-{
-}
-
-zedCamera::~zedCamera()
-{
-}
-
+// is camera connected?
 bool zedCamera::isConnected()
 {
     return m_camera.isOpened();
@@ -56,26 +48,25 @@ int zedCamera::getCameraInfo(CameraInfo& info)
     return 0;
 }
 
-// save/load camera parameters
-// (yml format)
+// save/load camera parameters (yml format)
 bool zedCamera::saveParams(const std::string fileName)
 {
-    return true;
-    ;
+    std::cerr << "zedCamera::saveParams: ** ERROR **: NOT IMPLEMENTED YET" << std::endl;
+    return false;
 }
 
 bool zedCamera::loadParams(const std::string fileName)
 {
-    return true;
-    ;
+    std::cerr << "zedCamera::loadParams: ** ERROR **: NOT IMPLEMENTED YET" << std::endl;
+    return false;
 }
 
 // open
 // open the camera for capturing at a specified
-// resolution and FPS
+// resolution and FPS.
+// Return non-zero on error.
 int zedCamera::open(ResolutionFPS resFPS)
 {
-
     sl::RESOLUTION res;
     int fps;
 
@@ -102,8 +93,7 @@ int zedCamera::open(ResolutionFPS resFPS)
         fps = 60;
         break;
     }
-
-    std::cout << "zedCamera::open: opening with fps=" << fps << ", res=" << res << std::endl;
+    // std::cout << "zedCamera::open: opening with fps=" << fps << ", res=" << res << std::endl;
 
     // Set configuration parameters
     InitParameters init_params;
@@ -119,28 +109,16 @@ int zedCamera::open(ResolutionFPS resFPS)
         m_camera.close();
         return -1;
     }
-    std::cout << "zedCamera::open: open succeeded" << std::endl;
-    std::cout << "zedCamera::open: reading camera information" << std::endl;
-    m_cameraInformation = m_camera.getCameraInformation();
-    sl::Resolution r = m_cameraInformation.camera_configuration.resolution;
-    std::cout << "zedCamera::open: serial number " << m_cameraInformation.serial_number
-              << std::endl;
-    std::cout << "zedCamera::open: resolution " << r.width << "x" << r.height << std::endl;
 
-    std::cout << "zedCamera::open: allocating image buffers" << std::endl;
-    // m_sl_image = sl::Mat(m_cameraInformation.camera_configuration.resolution, MAT_TYPE::U8_C4);
-    // m_cv_image = slMat2cvMat(m_sl_image);
-    // dumpImageProps(m_sl_image);
-    std::cout << "zedCamera::open: allocating image buffers" << std::endl;
-    cv::Size s = m_cv_image.size();
-    std::cout << "zedCamera::open: opencv w/h: " << s.width << "/" << s.height << std::endl;
+    // grab the camera information
+    m_cameraInformation = m_camera.getCameraInformation();
     return 0;
 }
 
 // close
 void zedCamera::close()
 {
-    std::cout << "zedCamera::close: closing camera" << std::endl;
+    // std::cout << "zedCamera::close: closing camera" << std::endl;
     m_camera.close();
 }
 
@@ -151,18 +129,11 @@ int zedCamera::reset()
     return 0;
 }
 
-void zedCamera::dumpImageProps(sl::Mat& im)
-{
-    std::cout << "image props: "
-              << "w=" << im.getWidth() << ", h=" << im.getHeight() << ", c=" << im.getChannels()
-              << ", dt=" << im.getDataType() << ", mt=" << im.getMemoryType() << std::endl;
-}
-
 // getFrame
-// get the latest camera frame
+// Capture the latest camera frame into an OpenCV matrix.
+// Return non-zero on error.
 int zedCamera::getFrame(cv::Mat& frame)
 {
-    std::cout << "zedCamera::getImage: capturing image" << std::endl;
     ERROR_CODE err = m_camera.grab();
     if (err == ERROR_CODE::SUCCESS)
     {
@@ -173,23 +144,31 @@ int zedCamera::getFrame(cv::Mat& frame)
             std::cerr << "zedCamera::getFrame: ** ERROR **: " << toString(err2) << std::endl;
             return -1;
         }
-        auto timestamp = m_camera.getTimestamp(sl::TIME_REFERENCE::IMAGE);
-        printf("zedCamera::getFrame: %d x %d  (ts: %llu)\n", im.getWidth(), im.getHeight(),
-               timestamp);
-        dumpImageProps(im);
-        // m_cv_image.copyTo(frame);
-        im.write("steve.jpg");
         cv::Mat cvim = slMat2cvMat(im);
         frame = cvim.clone();
     }
     else
     {
-        std::cerr << "zedCamera::captureImage: ** ERROR **: " << toString(err) << std::endl;
+        std::cerr << "zedCamera::getFrame: ** ERROR **: " << toString(err) << std::endl;
         return -1;
     }
     return 0;
 }
 
+//_______________________________________________
+// Helpers
+
+// dump stereolabs image properties to stdout
+void zedCamera::dumpImageProps(sl::Mat& im)
+{
+    std::cout << "image props: "
+              << "w=" << im.getWidth() << ", h=" << im.getHeight() << ", c=" << im.getChannels()
+              << ", dt=" << im.getDataType() << ", mt=" << im.getMemoryType() << std::endl;
+}
+
+// "convert" a stereolabs Mat into a cvMat
+// NOTE: the returned cvMat is shallow and points to the
+// same data as the as the input Mat.
 cv::Mat zedCamera::slMat2cvMat(Mat& input)
 {
     // Since cv::Mat data requires a uchar* pointer, we get the uchar1 pointer from sl::Mat
@@ -198,7 +177,7 @@ cv::Mat zedCamera::slMat2cvMat(Mat& input)
                    input.getPtr<sl::uchar1>(MEM::CPU), input.getStepBytes(sl::MEM::CPU));
 }
 
-// Mapping between MAT_TYPE and CV_TYPE
+// mapping between MAT_TYPE and CV_TYPE
 int zedCamera::getOCVtype(sl::MAT_TYPE type)
 {
     int cv_type = -1;

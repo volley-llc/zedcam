@@ -6,6 +6,8 @@
 namespace zv
 {
 
+// convenience enum to specify
+// resolution + framerate together
 enum class ResolutionFPS
 {
     HD1080_15,
@@ -15,6 +17,8 @@ enum class ResolutionFPS
     HD720_60,
 };
 
+// camera information struct
+// compatible with volley status
 struct CameraInfo
 {
     std::string make;
@@ -22,21 +26,17 @@ struct CameraInfo
     std::string firmware;
 };
 
+// class encapsulating the zed camera
 class zedCamera
 {
   public:
-    // construct/destruct
-    zedCamera();
-    virtual ~zedCamera();
-
     // is camera connected?
     bool isConnected();
 
     // get camera info
     int getCameraInfo(CameraInfo& info);
 
-    // save/load camera parameters
-    // (yml format)
+    // save/load camera parameters (yml format)
     bool saveParams(const std::string fileName);
     bool loadParams(const std::string fileName);
 
@@ -53,17 +53,9 @@ class zedCamera
     // get the latest camera frame
     int getFrame(cv::Mat& frame);
 
-    // getControls
-    // retrieve the current camera control settings
-
-    // setControls
-    // set the current camera control settings
-
   private:
     sl::Camera m_camera;
     sl::CameraInformation m_cameraInformation;
-    sl::Mat m_sl_image;
-    cv::Mat m_cv_image;
 
     cv::Mat slMat2cvMat(sl::Mat& input);
     int getOCVtype(sl::MAT_TYPE type);

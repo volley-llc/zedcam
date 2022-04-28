@@ -1,9 +1,12 @@
-SET(libName zedcamvolley)
+CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+project(zedcamvolley LANGUAGES CXX C)
+
+set(CMAKE_ENABLE_EXPORTS ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS 1)
 
 option(WITH_TEST "Configure with test exe" OFF)
 
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
-#PROJECT(${execName})
+SET(libName zedcamvolley)
 
 if(COMMAND cmake_policy)
     cmake_policy(SET CMP0003 OLD)
