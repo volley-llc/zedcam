@@ -20,6 +20,12 @@ find_package(ZED 2 REQUIRED)
 find_package(CUDA ${VERSION_REQ_CUDA} REQUIRED)
 SET(SPECIAL_OS_LIBS "pthread")
 
+find_package(OpenCV 4.5.0 REQUIRED)
+include_directories( ${OpenCV_INCLUDE_DIRS} )
+
+message(STATUS "cuda nppi: ${CUDA_nppi_LIBRARY}")
+message(STATUS "cuda npps: ${CUDA_npps_LIBRARY}")
+
 # Set link dirs (must be done before target creation)
 link_directories(${ZED_LIBRARY_DIR})
 link_directories(${CUDA_LIBRARY_DIRS})
@@ -44,7 +50,8 @@ if (WITH_TEST)
     ${SPECIAL_OS_LIBS}
     ${CUDA_LIBRARIES} 
     ${CUDA_npps_LIBRARY} 
-    ${CUDA_nppi_LIBRARY}
+    ${OpenCV_LIBS}
+    #${CUDA_nppi_LIBRARY}
   )
 endif()
 
@@ -65,5 +72,6 @@ target_link_libraries(${libName}
     ${SPECIAL_OS_LIBS}
     ${CUDA_LIBRARIES} 
     ${CUDA_npps_LIBRARY} 
-    ${CUDA_nppi_LIBRARY}
+    ${OpenCV_LIBS}
+    #${CUDA_nppi_LIBRARY}
 )

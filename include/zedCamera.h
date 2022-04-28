@@ -1,27 +1,29 @@
 #pragma once
 #include <sl/Camera.hpp>
+#include <opencv2/opencv.hpp>
+#include <opencv2/cvconfig.h>
 
 namespace zv
 {
 
-  enum class ResolutionFPS
-  {
+enum class ResolutionFPS
+{
     HD1080_15,
     HD1080_30,
     HD720_15,
     HD720_30,
     HD720_60,
-  };
+};
 
-  struct CameraInfo
-  {
+struct CameraInfo
+{
     std::string make;
     std::string model;
     std::string firmware;
-  };
+};
 
-  class zedCamera
-  {
+class zedCamera
+{
   public:
     // construct/destruct
     zedCamera();
@@ -31,7 +33,7 @@ namespace zv
     bool isConnected();
 
     // get camera info
-    int getCameraInfo(CameraInfo &info);
+    int getCameraInfo(CameraInfo& info);
 
     // save/load camera parameters
     // (yml format)
@@ -49,7 +51,7 @@ namespace zv
 
     // getFrame
     // get the latest camera frame
-    int getFrame();
+    int getFrame(cv::Mat& frame);
 
     // getControls
     // retrieve the current camera control settings
@@ -60,6 +62,12 @@ namespace zv
   private:
     sl::Camera m_camera;
     sl::CameraInformation m_cameraInformation;
-  };
+    sl::Mat m_sl_image;
+    cv::Mat m_cv_image;
 
-}
+    cv::Mat slMat2cvMat(sl::Mat& input);
+    int getOCVtype(sl::MAT_TYPE type);
+    void dumpImageProps(sl::Mat& im);
+};
+
+} // namespace zv
