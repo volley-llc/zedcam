@@ -36,6 +36,14 @@ class zedCamera
     // get camera info
     int getCameraInfo(CameraInfo& info);
 
+    // get and set camera intrinsics
+    cv::Mat getIntrinsicMatrix();
+    void setIntrinsicMatrix(const cv::Mat&);
+
+    // get and set camera distortion coeffs
+    cv::Mat getDistortionCoeffs();
+    void setDistortionCoeffs(const cv::Mat&);
+
     // save/load camera parameters (yml format)
     bool saveParams(const std::string fileName);
     bool loadParams(const std::string fileName);
@@ -56,6 +64,8 @@ class zedCamera
   private:
     sl::Camera m_camera;
     sl::CameraInformation m_cameraInformation;
+    cv::Mat m_intrinsic_matrix;
+    cv::Mat m_distortion_coeffs;
 
     cv::Mat slMat2cvMat(sl::Mat& input);
     int getOCVtype(sl::MAT_TYPE type);
