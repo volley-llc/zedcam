@@ -14,6 +14,28 @@ bool zedCamera::isConnected()
     return m_camera.isOpened();
 }
 
+// get and set camera intrinsic matrix
+cv::Mat zedCamera::getIntrinsicMatrix()
+{
+    return m_intrinsic_matrix.clone();
+}
+
+void zedCamera::setIntrinsicMatrix(const cv::Mat& iMat)
+{
+    iMat.copyTo(m_intrinsic_matrix);
+}
+
+// get and set camera distortion coeffs
+cv::Mat zedCamera::getDistortionCoeffs()
+{
+    return m_distortion_coeffs.clone();
+}
+
+void zedCamera::setDistortionCoeffs(const cv::Mat& dMat)
+{
+    dMat.copyTo(m_distortion_coeffs);
+}
+
 // get camera info
 int zedCamera::getCameraInfo(CameraInfo& info)
 {
@@ -112,6 +134,31 @@ int zedCamera::open(ResolutionFPS resFPS)
 
     // grab the camera information
     m_cameraInformation = m_camera.getCameraInformation();
+
+    // populate intrinsic matrix
+    // by reading from the camera info
+    m_intrinsic_matrix.create(3, 3, CV_64F);
+    m_intrinsic_matrix.setTo(cv::Scalar(0.0));
+    m_intrinsic_matrix.at<double>(0, 0) =
+        m_cameraInformation.camera_configuration.calibration_parameters.left_cam.fx;
+    m_intrinsic_matrix.at<double>(0, 2) =
+        m_cameraInformation.camera_configuration.calibration_parameters.left_cam.cx;
+    m_intrinsic_matrix.at<double>(1, 1) =
+        m_cameraInformation.camera_configuration.calibration_parameters.left_cam.fy;
+    m_intrinsic_matrix.at<double>(1, 2) =
+        m_cameraInformation.camera_configuration.calibration_parameters.left_cam.cy;
+    m_intrinsic_matrix.at<double>(2, 2) = 1.0;
+
+    // populate dist coeffs
+    // [ k1, k2, p1, p2, k3, k4, k5, k6, s1, s2, s3, s4]
+    m_distortion_coeffs.create(12, 1, CV_64F);
+    m_distortion_coeffs.setTo(cv::Scalar(0.0));
+    for (int i = 0; i < 12; i++)
+    {
+        m_distortion_coeffs.at<double>(i, 0) =
+            m_cameraInformation.camera_configuration.calibration_parameters.left_cam.disto[i];
+    }
+
     return 0;
 }
 
