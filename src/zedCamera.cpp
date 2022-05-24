@@ -84,11 +84,19 @@ bool zedCamera::loadParams(const std::string fileName)
 }
 
 // open
-// open the camera for capturing at a specified
-// resolution and FPS.
+// open the camera for capturing at a specified resolution and FPS
 // Return non-zero on error.
 int zedCamera::open(ResolutionFPS resFPS)
 {
+
+    if (m_camera.isOpened())
+    {
+        std::cerr << "zedCamera::open: ** WARN **: camera is already open. Closing camera and "
+                     "re-opening with new ResolutionFPS settings."
+                  << std::endl;
+        m_camera.close();
+    }
+
     sl::RESOLUTION res;
     int fps;
 
@@ -122,6 +130,48 @@ int zedCamera::open(ResolutionFPS resFPS)
     init_params.camera_resolution = res;
     init_params.camera_fps = fps;
 
+    return _open(init_params);
+}
+
+// open
+// open the camera for capturing and load InitParameters from given file.
+// Return non-zero on error.
+int zedCamera::open(const std::string& init_params_file_name)
+{
+    if (init_params_file_name.empty())
+    {
+        std::cerr << "zedCamera::open: ** ERROR **: Empty InitParameters filename." << std::endl;
+        return -1;
+    }
+
+    if (m_camera.isOpened())
+    {
+        std::cerr << "zedCamera::open: ** WARN **: camera is already open. Closing camera and "
+                     "re-opening with new InitParameters from the settings file: "
+                  << init_params_file_name << std::endl;
+        m_camera.close();
+    }
+
+    // Set configuration parameters
+    InitParameters init_params;
+    if (!init_params.load(sl::String(init_params_file_name.c_str())))
+    {
+        std::cerr << "zedCamera::open: ** ERROR **: failed loading init parameters from given file:"
+                  << init_params_file_name << std::endl;
+        m_camera.close();
+        return -1;
+    }
+
+    return _open(init_params);
+}
+
+// open
+// open the camera for capturing with specified InitParameters and update
+// intrinsic matrix and distortion coefficient vector
+// Return non-zero on error.
+int zedCamera::_open(InitParameters& init_params)
+{
+
     // open the camera
     ERROR_CODE err = m_camera.open(init_params);
     if (err != ERROR_CODE::SUCCESS)
@@ -137,22 +187,20 @@ int zedCamera::open(ResolutionFPS resFPS)
 
     // populate intrinsic matrix
     // by reading from the camera info
-    m_intrinsic_matrix.create(3, 3, CV_64F);
-    m_intrinsic_matrix.setTo(cv::Scalar(0.0));
-    m_intrinsic_matrix.at<double>(0, 0) =
+    m_intrinsic_matrix = cv::Mat::zeros(3, 3, CV_64F);
+    m_intrinsic_matrix(0, 0) =
         m_cameraInformation.camera_configuration.calibration_parameters.left_cam.fx;
-    m_intrinsic_matrix.at<double>(0, 2) =
+    m_intrinsic_matrix(0, 2) =
         m_cameraInformation.camera_configuration.calibration_parameters.left_cam.cx;
-    m_intrinsic_matrix.at<double>(1, 1) =
+    m_intrinsic_matrix(1, 1) =
         m_cameraInformation.camera_configuration.calibration_parameters.left_cam.fy;
-    m_intrinsic_matrix.at<double>(1, 2) =
+    m_intrinsic_matrix(1, 2) =
         m_cameraInformation.camera_configuration.calibration_parameters.left_cam.cy;
-    m_intrinsic_matrix.at<double>(2, 2) = 1.0;
+    m_intrinsic_matrix(2, 2) = 1.0;
 
     // populate dist coeffs
     // [ k1, k2, p1, p2, k3, k4, k5, k6, s1, s2, s3, s4]
-    m_distortion_coeffs.create(12, 1, CV_64F);
-    m_distortion_coeffs.setTo(cv::Scalar(0.0));
+    m_distortion_coeffs = cv::Mat::zeros(12, 1, CV_64F);
     for (int i = 0; i < 12; i++)
     {
         m_distortion_coeffs.at<double>(i, 0) =
