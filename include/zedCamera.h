@@ -51,6 +51,8 @@ class zedCamera
     // open/close
     // open the camera for capturing at a specified resolution and FPS
     int open(ResolutionFPS);
+    // overload open
+    int open(const std::string& init_params_file_name);
     void close();
 
     // reset
@@ -64,9 +66,10 @@ class zedCamera
   private:
     sl::Camera m_camera;
     sl::CameraInformation m_cameraInformation;
-    cv::Mat m_intrinsic_matrix;
-    cv::Mat m_distortion_coeffs;
+    cv::Mat1d m_intrinsic_matrix;
+    cv::Mat1d m_distortion_coeffs;
 
+    int _open(sl::InitParameters& init_params);
     cv::Mat slMat2cvMat(sl::Mat& input);
     int getOCVtype(sl::MAT_TYPE type);
     void dumpImageProps(sl::Mat& im);
