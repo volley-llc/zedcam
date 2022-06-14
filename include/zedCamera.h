@@ -26,6 +26,11 @@ struct CameraInfo
     std::string firmware;
 };
 
+// Settings for
+// Basically omitting upper 30% of the image (where sky/sun is)
+// NOTE. .3 gives good results for now if needed make it configurable parameter
+static const double Y_START = 0.3;
+
 // class encapsulating the zed camera
 class zedCamera
 {

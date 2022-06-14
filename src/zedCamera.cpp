@@ -185,6 +185,24 @@ int zedCamera::_open(InitParameters& init_params)
     // grab the camera information
     m_cameraInformation = m_camera.getCameraInformation();
 
+    // Set the Roi for automatic gain and exposure time adjustment
+    int roi_x = 0;
+    int roi_y = m_cameraInformation.camera_resolution.height * Y_START;
+    int roi_w = m_cameraInformation.camera_resolution.width;
+    int roi_h = m_cameraInformation.camera_resolution.height * (1 - Y_START);
+    Rect rect = Rect(roi_x, roi_y, roi_w, roi_h);
+    err = m_camera.setCameraSettings(VIDEO_SETTINGS::AEC_AGC_ROI, rect);
+    if (err != ERROR_CODE::SUCCESS)
+    {
+        std::cerr << "zedCamera::open: ** ERROR **: failed to set AEC_AGC_ROI for the camera: "
+                  << toString(err) << std::endl;
+    }
+    // else
+    //{
+    //    std::cout << "zedCamera::open: ** INFO **: successfully set AEC_AGC_ROI for the camera: "
+    //              << std::endl;
+    //}
+
     // populate intrinsic matrix
     // by reading from the camera info
     m_intrinsic_matrix = cv::Mat::zeros(3, 3, CV_64F);
