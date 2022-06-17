@@ -18,6 +18,7 @@ int main(int argc, char** argv)
     std::cout << "info return: " << ret << std::endl;
     std::cout << "info: "
               << "make=" << info.make << ", model=" << info.model << ", firmware=" << info.firmware
+              << ", frame_width=" << info.frame_width << ", frame_height=" << info.frame_height
               << std::endl;
     std::cout << "camera connected: " << zed.isConnected() << std::endl;
     //

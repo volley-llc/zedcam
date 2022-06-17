@@ -24,6 +24,8 @@ struct CameraInfo
     std::string make;
     std::string model;
     std::string firmware;
+    int frame_width;
+    int frame_height;
 };
 
 // Settings for

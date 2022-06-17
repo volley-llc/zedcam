@@ -67,6 +67,8 @@ int zedCamera::getCameraInfo(CameraInfo& info)
     }
     unsigned int fw = m_cameraInformation.camera_configuration.firmware_version;
     info.firmware = std::to_string(fw);
+    info.frame_width = m_cameraInformation.camera_resolution.width;
+    info.frame_height = m_cameraInformation.camera_resolution.height;
     return 0;
 }
 
